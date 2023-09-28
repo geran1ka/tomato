@@ -1,13 +1,15 @@
 import {main} from './js/main';
-import {counter} from './js/counter';
+import {Counter} from './js/counter';
 
 
 import './index.html';
 import './scss/index.scss';
 
 main();
-console.log(counter);
-console.log(counter.incrementCounter());
-console.log(counter.setName('Решено'));
+const counter = new Counter('Решить задача модуля 8 урок 3', 1);
 
+console.log(counter);
+console.log(counter.count = 2);
+console.log(counter.name = 'Решено');
+console.log(counter);
 

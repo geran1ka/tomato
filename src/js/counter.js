@@ -5,8 +5,9 @@ export class Counter {
     this._count = count;
   }
 
-  set count(value) {
-    this._count += value;
+  setCount() {
+    this._count += 1;
+    return this
   }
 
   get count() {

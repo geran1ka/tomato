@@ -9,7 +9,7 @@ main();
 const counter = new Counter('Решить задача модуля 8 урок 3', 1);
 
 console.log(counter);
-console.log(counter.count = 2);
+console.log(counter.setCount());
 console.log(counter.name = 'Решено');
 console.log(counter);
 

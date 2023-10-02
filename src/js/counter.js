@@ -1,4 +1,4 @@
-export class Counter {
+export class Task {
   constructor(name, count = 0) {
     this.id = Math.floor(Math.random() * 1000);
     this._name = name;
@@ -7,7 +7,7 @@ export class Counter {
 
   setCount() {
     this._count += 1;
-    return this
+    return this;
   }
 
   get count() {

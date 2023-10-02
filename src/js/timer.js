@@ -32,9 +32,11 @@ export class Timer {
     this.activeTask.setCount();
 
     if (this.activeTask.count % 3 === 0) {
-      startPause(this.timerBigPause);
+      // console.log(`Запущена длинная пауза на ${this.timerBigPause} минут`);
+      this.startPause(this.timerBigPause)
     } else {
-      startPause(this.timerPause);
+      // console.log(`Запущена короткая пауза на ${this.timerPause} минут`);
+      this.startPause(this.timerPause)
     }
   }
 

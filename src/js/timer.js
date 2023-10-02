@@ -32,13 +32,13 @@ export class Timer {
     this.activeTask.setCount();
 
     if (this.activeTask.count % 3 === 0) {
-      startBreak(this.timerBigPause);
+      startPause(this.timerBigPause);
     } else {
-      startBreak(this.timerPause);
+      startPause(this.timerPause);
     }
   }
 
-  startBreak(time) {
+  startPause(time) {
     console.log(`Запущен перерыв на ${time} минут`);
   }
 

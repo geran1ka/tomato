@@ -1,10 +1,14 @@
 export class Timer {
   constructor({timerTime = 25, timerPause = 5, timerBigPause = 15, tasks = []}) {
+    if (Timer._instance) {
+      return Timer._instance;
+    }
     this.timerTime = timerTime;
     this.timerPause = timerPause;
     this.timerBigPause = timerBigPause;
     this.tasks = tasks;
     this.activeTask = null;
+    Timer._instance = this
   }
 
   addTask(task) {

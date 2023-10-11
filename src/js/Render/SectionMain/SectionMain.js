@@ -31,19 +31,19 @@ export class SectionMain {
         id: 286,
         text: 'Решить задачу',
         count: 0,
-        important: 'важная',
+        important: 'important',
       },
       {
         id: 287,
         text: 'Сверстать сайт',
         count: 0,
-        important: 'стандартная',
+        important: 'standart',
       },
       {
         id: 288,
         text: 'Поспать',
         count: 0,
-        important: 'неважная',
+        important: 'default',
       },
     ]);
 
@@ -132,6 +132,7 @@ export class SectionMain {
     btnAdd.type = 'button';
     btnAdd.textContent = 'Добавить';
 
+
     btnAdd.addEventListener('click', () => {
       const task = input.value;
       console.log(`Добавить задачу ${task}`);
@@ -179,14 +180,14 @@ export class SectionMain {
 
     const pomodoroTasksQuestListTasksItems = arrTask.map(item => {
       const li = document.createElement('li');
-      li.classList.add(`pomodoro-tasks__list-task`, 
-        `${item.important === 'важная' ? 
-          'important' : item.important === 'стандартная' ? 'so-so' : 'default'}`
-        );
-        li.id = item.id;
+      li.classList.add(`pomodoro-tasks__list-task`,
+          `${item.important === 'important' ?
+          'important' : item.important === 'standart' ? 'so-so' : 'default'}`,
+      );
+      li.id = item.id;
 
       const span = document.createElement('span');
-      span.classList.add('counter-number');
+      span.classList.add('count-number');
       span.textContent = item.count;
 
       const btn = document.createElement('button');
@@ -201,7 +202,7 @@ export class SectionMain {
       btnTwo.addEventListener('click', () => {
         console.log('popup');
         btnWrapper.classList.toggle('burger-popup_active');
-      })
+      });
 
       const btnEdit = document.createElement('button');
       btnEdit.classList.add('popup-button', 'burger-popup__edit-button');
@@ -209,58 +210,29 @@ export class SectionMain {
       btnEdit.addEventListener('click', () => {
         console.log('edit');
         btnWrapper.classList.toggle('burger-popup_active');
-      })
+      });
 
       const btnDel = document.createElement('button');
       btnDel.classList.add('popup-button', 'burger-popup__delete-button');
       btnDel.textContent = 'Удалить';
       btnDel.addEventListener('click', () => {
         console.log('del');
-      })
+      });
 
       btnWrapper.append(btnEdit, btnDel);
       li.append(span, btn, btnTwo, btnWrapper);
-      console.log('li: ', li);
 
       return li;
     });
 
+    const pomodoroTasksDeadlineTimer = document.createElement('p');
+    pomodoroTasksDeadlineTimer.classList.add('pomodoro-tasks__deadline-timer');
+    pomodoroTasksDeadlineTimer.textContent = '1 час 30 мин';
+
+
     pomodoroTasksQuestListTasks.append(...pomodoroTasksQuestListTasksItems);
-    pomodoroTasks.append(pomodoroTasksHeaderTitle, pomodoroTasksQuestList, pomodoroTasksQuestListTasks);
+    pomodoroTasks.append(pomodoroTasksHeaderTitle, pomodoroTasksQuestList, pomodoroTasksQuestListTasks, pomodoroTasksDeadlineTimer);
 
     return pomodoroTasks;
   }
 }
-
-{/*      <ul class="pomodoro-tasks__quest-tasks">
-            <li class="pomodoro-tasks__list-task important">
-              <span class="count-number">1</span>
-              <button class="pomodoro-tasks__task-text pomodoro-tasks__task-text_active">
-                Сверстать сайт
-              </button>
-              <button class="pomodoro-tasks__task-button"></button>
-              <!-- popup menu -->
-              <div class="burger-popup burger-popup_active">
-                <button class="popup-button burger-popup__edit-button">Редактировать</button>
-                <button class="popup-button burger-popup__delete-button">Удалить</button>
-              </div>
-            </li>
-            <li class="pomodoro-tasks__list-task so-so">
-              <span class="count-number">1</span>
-              <button class="pomodoro-tasks__task-text">
-                Оплатить налоги
-              </button>
-              <button class="pomodoro-tasks__task-button"></button>
-              <!-- popup menu -->
-
-            </li>
-            <li class="pomodoro-tasks__list-task default">
-              <span class="count-number">3</span>
-              <button class="pomodoro-tasks__task-text">
-                Проверить валидность
-              </button>
-              <button class="pomodoro-tasks__task-button"></button>
-            </li>
-          </ul>
-          <p class="pomodoro-tasks__deadline-timer">1 час 30 мин</p>
-        </div> */}

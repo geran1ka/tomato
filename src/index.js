@@ -8,6 +8,7 @@ import './scss/index.scss';
 import { Header } from './js/Render/Header/Header';
 import { Main } from './js/Render/Main/Main';
 import { SectionMain } from './js/Render/SectionMain/SectionMain';
+import { TaskService } from './js/Storage/Storage';
 
 
 // const timer = new Timer({timerTime: 25, timerPause: 10, timerBigPause: 15, tasks: []});
@@ -23,7 +24,6 @@ import { SectionMain } from './js/Render/SectionMain/SectionMain';
 // console.log('timer: ', timer);
 // timer.startTask(timer.tasks[0].id);
 // console.log('timer: ', timer);
-
 new Header().mount();
 new Main().mount();
 new SectionMain().mount(new Main().element);

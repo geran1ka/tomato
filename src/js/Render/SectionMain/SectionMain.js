@@ -1,3 +1,5 @@
+import { Storage, TaskService } from '../../Storage/Storage';
+import { ImportantTask } from '../../Task';
 import {main} from '../../main';
 import {addContainer} from '../addContainer';
 
@@ -10,7 +12,9 @@ export class SectionMain {
       this.element.classList.add('main');
       this.containerElement = addContainer(this.element, 'main');
       this.isMounted = false;
+      this.storage = new TaskService();
     }
+    console.log(this.storage);
 
     return SectionMain.instance;
   }
@@ -26,26 +30,28 @@ export class SectionMain {
     const windowPanel = this.getWindowPanel('Сверстать сайт', 'Томат 2');
     const windowBody = this.getWindowBody('30:00');
     const form = this.getForm();
-    const pomodoroTasks = this.getPomodoroTasks([
-      {
-        id: 286,
-        text: 'Решить задачу',
-        count: 0,
-        important: 'important',
-      },
-      {
-        id: 287,
-        text: 'Сверстать сайт',
-        count: 0,
-        important: 'standart',
-      },
-      {
-        id: 288,
-        text: 'Поспать',
-        count: 0,
-        important: 'default',
-      },
-    ]);
+    const pomodoroTasks = this.storage.get();
+    console.log('pomodoroTasks: ', pomodoroTasks);
+    // const pomodoroTasks = this.getPomodoroTasks([
+    //   {
+    //     id: 286,
+    //     text: 'Решить задачу',
+    //     count: 0,
+    //     important: 'important',
+    //   },
+    //   {
+    //     id: 287,
+    //     text: 'Сверстать сайт',
+    //     count: 0,
+    //     important: 'standart',
+    //   },
+    //   {
+    //     id: 288,
+    //     text: 'Поспать',
+    //     count: 0,
+    //     important: 'default',
+    //   },
+    // ]);
 
     windowWrapper.append(windowPanel, windowBody, form, pomodoroTasks);
 
@@ -134,8 +140,10 @@ export class SectionMain {
 
 
     btnAdd.addEventListener('click', () => {
-      const task = input.value;
+      const task = new ImportantTask(input.value);
+      console.log('task: ', task);
       console.log(`Добавить задачу ${task}`);
+      this.storage.add(task);
       input.value = '';
     });
 

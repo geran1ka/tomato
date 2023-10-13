@@ -1,6 +1,7 @@
-import { Storage, TaskService } from '../../Storage/Storage';
-import { ImportantTask } from '../../Task';
+import {Storage, TaskService} from '../../Storage/Storage';
+import {ImportantTask} from '../../Task';
 import {main} from '../../main';
+import {Main} from '../Main/Main';
 import {addContainer} from '../addContainer';
 
 export class SectionMain {
@@ -14,7 +15,6 @@ export class SectionMain {
       this.isMounted = false;
       this.storage = new TaskService();
     }
-    console.log(this.storage);
 
     return SectionMain.instance;
   }
@@ -30,8 +30,9 @@ export class SectionMain {
     const windowPanel = this.getWindowPanel('Сверстать сайт', 'Томат 2');
     const windowBody = this.getWindowBody('30:00');
     const form = this.getForm();
-    const pomodoroTasks = this.storage.get();
-    console.log('pomodoroTasks: ', pomodoroTasks);
+    const pomodoroTasks = this.getPomodoroTasks(this.storage.get());
+    console.log('this.storage.get(): ', this.storage.get());
+    // console.log('pomodoroTasks: ', pomodoroTasks);
     // const pomodoroTasks = this.getPomodoroTasks([
     //   {
     //     id: 286,
@@ -144,6 +145,8 @@ export class SectionMain {
       console.log('task: ', task);
       console.log(`Добавить задачу ${task}`);
       this.storage.add(task);
+      this.unmount();
+      this.mount(new Main().element);
       input.value = '';
     });
 
@@ -196,11 +199,11 @@ export class SectionMain {
 
       const span = document.createElement('span');
       span.classList.add('count-number');
-      span.textContent = item.count;
+      span.textContent = item._count;
 
       const btn = document.createElement('button');
       btn.classList.add('pomodoro-tasks__task-text', 'pomodoro-tasks__task-text_active');
-      btn.textContent = item.text;
+      btn.textContent = item._text;
 
       const btnTwo = document.createElement('button');
       btnTwo.classList.add('pomodoro-tasks__task-button');
@@ -208,7 +211,6 @@ export class SectionMain {
       const btnWrapper = document.createElement('div');
       btnWrapper.classList.add('burger-popup');
       btnTwo.addEventListener('click', () => {
-        console.log('popup');
         btnWrapper.classList.toggle('burger-popup_active');
       });
 
@@ -223,8 +225,15 @@ export class SectionMain {
       const btnDel = document.createElement('button');
       btnDel.classList.add('popup-button', 'burger-popup__delete-button');
       btnDel.textContent = 'Удалить';
-      btnDel.addEventListener('click', () => {
-        console.log('del');
+      btnDel.addEventListener('click', ({target}) => {
+        const arrTask = this.storage.get();
+        console.log('arrTask: ', arrTask);
+        const id = arrTask.findIndex(item => item.id === +target.closest('.pomodoro-tasks__list-task').id);
+        const newArrTask = arrTask.filter((item, index) => {
+          if (index !== id) return item;
+        });
+        localStorage.removeItem('tomato');
+        this.storage.add(newArrTask);
       });
 
       btnWrapper.append(btnEdit, btnDel);

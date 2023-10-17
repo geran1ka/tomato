@@ -1,6 +1,6 @@
 import { addContainer } from "../addContainer";
 
-import imgLogo from '../../../img/svg/noto_tomato.svg';
+import imgLogo from '../../../../img/svg/noto_tomato.svg';
 
 export class Header {
   static instance;

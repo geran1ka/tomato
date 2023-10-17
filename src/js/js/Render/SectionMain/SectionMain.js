@@ -1,19 +1,21 @@
-import {Storage, TaskService} from '../../Storage/Storage';
-import {ImportantTask} from '../../Task';
+import {ImportantTask, StandartTask, UnimportantTask} from '../../Task';
 import {main} from '../../main';
 import {Main} from '../Main/Main';
 import {addContainer} from '../addContainer';
 
 export class SectionMain {
   static instance;
-  constructor() {
+  constructor(storage, state, timer) {
     if (!SectionMain.instance) {
       SectionMain.instance = this;
       this.element = document.createElement('section');
       this.element.classList.add('main');
       this.containerElement = addContainer(this.element, 'main');
       this.isMounted = false;
-      this.storage = new TaskService();
+      this.storage = storage;
+      this.todoList = storage.get();
+      this.state = state;
+      this.timer = timer;
     }
 
     return SectionMain.instance;
@@ -27,32 +29,11 @@ export class SectionMain {
     const windowWrapper = document.createElement('div');
     windowWrapper.classList.add('pomodoro-form', 'window');
 
-    const windowPanel = this.getWindowPanel('Сверстать сайт', 'Томат 2');
+    const windowPanel = this.getWindowPanel(this.state);
     const windowBody = this.getWindowBody('30:00');
     const form = this.getForm();
-    const pomodoroTasks = this.getPomodoroTasks(this.storage.get());
-    console.log('this.storage.get(): ', this.storage.get());
-    // console.log('pomodoroTasks: ', pomodoroTasks);
-    // const pomodoroTasks = this.getPomodoroTasks([
-    //   {
-    //     id: 286,
-    //     text: 'Решить задачу',
-    //     count: 0,
-    //     important: 'important',
-    //   },
-    //   {
-    //     id: 287,
-    //     text: 'Сверстать сайт',
-    //     count: 0,
-    //     important: 'standart',
-    //   },
-    //   {
-    //     id: 288,
-    //     text: 'Поспать',
-    //     count: 0,
-    //     important: 'default',
-    //   },
-    // ]);
+    const pomodoroTasks = this.getPomodoroTasks(this.todoList);
+
 
     windowWrapper.append(windowPanel, windowBody, form, pomodoroTasks);
 
@@ -66,17 +47,17 @@ export class SectionMain {
     this.isMounted = false;
   }
 
-  getWindowPanel(name, count) {
+  getWindowPanel(state) {
     const windowPanel = document.createElement('div');
     windowPanel.classList.add('window__panel');
 
     const windowPanelTitle = document.createElement('p');
     windowPanelTitle.classList.add('window__panel-title');
-    windowPanelTitle.textContent = name;
+    windowPanelTitle.textContent = state.activeTodo?.title || '';
 
     const windowPanelTaskText = document.createElement('p');
     windowPanelTaskText.classList.add('window__panel-task-text');
-    windowPanelTaskText.textContent = count;
+    windowPanelTaskText.textContent = state.activeTodo?.count || 0;
 
     windowPanel.append(windowPanelTitle, windowPanelTaskText);
     return windowPanel;
@@ -99,7 +80,7 @@ export class SectionMain {
     startBtn.textContent = 'Старт';
 
     startBtn.addEventListener('click', () => {
-      console.log('старт таймера');
+      this.timer.startTimer(windowTimerText);
     });
 
     const stopBtn = document.createElement('button');
@@ -107,7 +88,7 @@ export class SectionMain {
     stopBtn.textContent = 'Стоп';
 
     stopBtn.addEventListener('click', () => {
-      console.log('стоп таймера');
+      this.timer.stop();
     });
 
     windowsButtons.append(startBtn, stopBtn);
@@ -125,12 +106,30 @@ export class SectionMain {
     input.type = 'text';
     input.name = 'task-name';
     input.id = 'task-name';
+    input.dataset.important = 'default'
     input.placeholder = 'название задачи';
 
     const btnImportant = document.createElement('button');
     btnImportant.classList.add('button', 'button-importance', 'default');
     btnImportant.type = 'button';
     btnImportant.ariaLabel = 'Указать важность';
+    let count = 0;
+    const imp = ['default', 'important', 'so-so'];
+    btnImportant.addEventListener('click', ({target}) => {
+      count += 1;
+      if (count >= imp.length) {
+        count = 0;
+      }
+  
+      for (let i = 0; i < imp.length; i++) {
+        if (count === i) {
+          target.classList.add(imp[i]);
+        } else {
+          target.classList.remove(imp[i]);
+        }
+      }
+      input.dataset.important = imp[count]
+    });
 
     main(btnImportant);
 
@@ -141,12 +140,16 @@ export class SectionMain {
 
 
     btnAdd.addEventListener('click', () => {
-      const task = new ImportantTask(input.value);
-      console.log('task: ', task);
-      console.log(`Добавить задачу ${task}`);
-      this.storage.add(task);
-      this.unmount();
-      this.mount(new Main().element);
+      const list = document.querySelector('.pomodoro-tasks__quest-tasks');
+      const importance = input.dataset.important
+      console.log('importance: ', importance);
+      const task = importance === 'important' ?
+        new ImportantTask(input.value) :
+        importance === 'so-so' ?
+          new StandartTask(input.value) : new UnimportantTask(input.value)
+      list.prepend(this.addTask(task))
+      this.storage.set(task);
+
       input.value = '';
     });
 
@@ -155,7 +158,7 @@ export class SectionMain {
     return form;
   }
 
-  getPomodoroTasks(arrTask) {
+  getPomodoroTasks(todoList) {
     const pomodoroTasks = document.createElement('div');
     pomodoroTasks.classList.add('pomodoro-tasks');
 
@@ -188,68 +191,100 @@ export class SectionMain {
 
     const pomodoroTasksQuestListTasks = document.createElement('ul');
     pomodoroTasksQuestListTasks.classList.add('pomodoro-tasks__quest-tasks');
-
-    const pomodoroTasksQuestListTasksItems = arrTask.map(item => {
+    if (todoList) {
+      const pomodoroTasksQuestListTasksItems = todoList.map(item => {
+        return this.addTask(item);
+      });  
+      pomodoroTasksQuestListTasks.append(...pomodoroTasksQuestListTasksItems);
+    } else {
       const li = document.createElement('li');
-      li.classList.add(`pomodoro-tasks__list-task`,
-          `${item.important === 'important' ?
-          'important' : item.important === 'standart' ? 'so-so' : 'default'}`,
-      );
-      li.id = item.id;
+      li.classList.add('pomodoro-tasks__list-task');
 
-      const span = document.createElement('span');
-      span.classList.add('count-number');
-      span.textContent = item._count;
+      const link = document.createElement('a');
+      link.classList.add('pomodoro-tasks__task-text');
+      link.href = '#task-name';
+      link.textContent = 'Добавить задачу';
 
-      const btn = document.createElement('button');
-      btn.classList.add('pomodoro-tasks__task-text', 'pomodoro-tasks__task-text_active');
-      btn.textContent = item._text;
-
-      const btnTwo = document.createElement('button');
-      btnTwo.classList.add('pomodoro-tasks__task-button');
-
-      const btnWrapper = document.createElement('div');
-      btnWrapper.classList.add('burger-popup');
-      btnTwo.addEventListener('click', () => {
-        btnWrapper.classList.toggle('burger-popup_active');
-      });
-
-      const btnEdit = document.createElement('button');
-      btnEdit.classList.add('popup-button', 'burger-popup__edit-button');
-      btnEdit.textContent = 'Редактировать';
-      btnEdit.addEventListener('click', () => {
-        console.log('edit');
-        btnWrapper.classList.toggle('burger-popup_active');
-      });
-
-      const btnDel = document.createElement('button');
-      btnDel.classList.add('popup-button', 'burger-popup__delete-button');
-      btnDel.textContent = 'Удалить';
-      btnDel.addEventListener('click', ({target}) => {
-        const arrTask = this.storage.get();
-        console.log('arrTask: ', arrTask);
-        const id = arrTask.findIndex(item => item.id === +target.closest('.pomodoro-tasks__list-task').id);
-        const newArrTask = arrTask.filter((item, index) => {
-          if (index !== id) return item;
-        });
-        localStorage.removeItem('tomato');
-        this.storage.add(newArrTask);
-      });
-
-      btnWrapper.append(btnEdit, btnDel);
-      li.append(span, btn, btnTwo, btnWrapper);
-
-      return li;
-    });
+      li.append(link);
+      pomodoroTasksQuestListTasks.append(li);
+    }
 
     const pomodoroTasksDeadlineTimer = document.createElement('p');
     pomodoroTasksDeadlineTimer.classList.add('pomodoro-tasks__deadline-timer');
     pomodoroTasksDeadlineTimer.textContent = '1 час 30 мин';
 
 
-    pomodoroTasksQuestListTasks.append(...pomodoroTasksQuestListTasksItems);
+    
     pomodoroTasks.append(pomodoroTasksHeaderTitle, pomodoroTasksQuestList, pomodoroTasksQuestListTasks, pomodoroTasksDeadlineTimer);
 
     return pomodoroTasks;
+  }
+
+  addTask(task) {
+    const li = document.createElement('li');
+    li.classList.add(`pomodoro-tasks__list-task`,
+        `${task.importance === 'important' ?
+        'important' : task.importance === 'standart' ? 'so-so' : 'default'}`,
+    );
+    li.dataset.importance =`${task.importance === 'important' ?
+    'important' : task.importance === 'standart' ? 'so-so' : 'default'}`;
+    li.id = task.id;
+
+
+    const span = document.createElement('span');
+    span.classList.add('count-number');
+    span.textContent = task._count;
+
+    const btn = document.createElement('button');
+    btn.classList.add('pomodoro-tasks__task-text', 'pomodoro-tasks__task-text_active');
+    btn.textContent = task._title;
+    btn.addEventListener('click', () => {
+      this.state.activeTodo = task;
+      const title = document.querySelector('.window__panel-title');
+      const count = document.querySelector('.window__panel-task-text');
+      title.textContent = this.state.activeTodo._title;
+      this.state.status = 'work';
+    })
+
+    const btnTwo = document.createElement('button');
+    btnTwo.classList.add('pomodoro-tasks__task-button');
+
+    const btnWrapper = document.createElement('div');
+    btnWrapper.classList.add('burger-popup');
+    btnTwo.addEventListener('click', ({target}) => {
+      btnWrapper.classList.toggle('burger-popup_active');
+
+    });
+
+    const btnEdit = document.createElement('button');
+    btnEdit.classList.add('popup-button', 'burger-popup__edit-button');
+    btnEdit.textContent = 'Редактировать';
+    btnEdit.addEventListener('click', ({target}) => {
+      const input = document.querySelector('.task-name');
+      const btnImportant = document.querySelector('.button-importance');
+      const item =  target.closest('.pomodoro-tasks__list-task');
+      const editTodo = target.closest('.pomodoro-tasks__list-task');
+      btnImportant.className = `button button-importance ${item.dataset.importance}`;
+      btnWrapper.classList.toggle('burger-popup_active');
+
+      input.value = item.querySelector('.pomodoro-tasks__task-text').textContent;
+      input.focus();
+      this.storage.delete(editTodo);
+      editTodo.remove();
+    });
+
+    const btnDel = document.createElement('button');
+    btnDel.classList.add('popup-button', 'burger-popup__delete-button');
+    btnDel.textContent = 'Удалить';
+    btnDel.addEventListener('click', ({target}) => {
+        const delTodo = target.closest('.pomodoro-tasks__list-task');
+        delTodo.remove();
+        this.storage.delete(delTodo);
+    });
+
+    btnWrapper.append(btnEdit, btnDel);
+    li.append(span, btn, btnTwo, btnWrapper);
+
+    return li;
   }
 }

@@ -1,6 +1,5 @@
-import {ImportantTask, StandartTask, UnimportantTask} from '../../Task';
-import {main} from '../../main';
-import {Main} from '../Main/Main';
+import { ImportantTask, StandartTask, UnimportantTask } from '../../Task/Task';
+import {getTimeMinSec, main } from '../../utils';
 import {addContainer} from '../addContainer';
 
 export class SectionMain {
@@ -30,7 +29,7 @@ export class SectionMain {
     windowWrapper.classList.add('pomodoro-form', 'window');
 
     const windowPanel = this.getWindowPanel(this.state);
-    const windowBody = this.getWindowBody('30:00');
+    const windowBody = this.getWindowBody(this.state);
     const form = this.getForm();
     const pomodoroTasks = this.getPomodoroTasks(this.todoList);
 
@@ -53,8 +52,8 @@ export class SectionMain {
 
     const windowPanelTitle = document.createElement('p');
     windowPanelTitle.classList.add('window__panel-title');
-    windowPanelTitle.textContent = state.activeTodo?.title || '';
-
+    windowPanelTitle.textContent = state.activeTodo?.title || 'Нет активной задачи';
+    
     const windowPanelTaskText = document.createElement('p');
     windowPanelTaskText.classList.add('window__panel-task-text');
     windowPanelTaskText.textContent = state.activeTodo?.count || 0;
@@ -63,14 +62,13 @@ export class SectionMain {
     return windowPanel;
   }
 
-  getWindowBody(time) {
+  getWindowBody(state) {
     const windowBody = document.createElement('div');
     windowBody.classList.add('window__body');
 
     const windowTimerText = document.createElement('p');
     windowTimerText.classList.add('window__timer-text');
-    windowTimerText.textContent = time;
-
+    windowTimerText.textContent = getTimeMinSec(state);
 
     const windowsButtons = document.createElement('div');
     windowsButtons.classList.add('window__buttons');
@@ -80,7 +78,16 @@ export class SectionMain {
     startBtn.textContent = 'Старт';
 
     startBtn.addEventListener('click', () => {
-      this.timer.startTimer(windowTimerText);
+      if (!state.activeTodo) return;
+      if (state.isActive) {
+        clearTimeout(state.timerId);
+        state.isActive = false;
+        startBtn.textContent = 'Cтарт';
+      } else {
+        state.isActive = true;
+        startBtn.textContent = 'Пауза';
+        this.timer.startTimer(windowTimerText);
+      }
     });
 
     const stopBtn = document.createElement('button');
@@ -89,6 +96,8 @@ export class SectionMain {
 
     stopBtn.addEventListener('click', () => {
       this.timer.stop();
+      windowTimerText.textContent = getTimeMinSec(this.state);
+      startBtn.textContent = 'Cтарт';
     });
 
     windowsButtons.append(startBtn, stopBtn);
@@ -142,7 +151,6 @@ export class SectionMain {
     btnAdd.addEventListener('click', () => {
       const list = document.querySelector('.pomodoro-tasks__quest-tasks');
       const importance = input.dataset.important
-      console.log('importance: ', importance);
       const task = importance === 'important' ?
         new ImportantTask(input.value) :
         importance === 'so-so' ?
@@ -213,8 +221,6 @@ export class SectionMain {
     pomodoroTasksDeadlineTimer.classList.add('pomodoro-tasks__deadline-timer');
     pomodoroTasksDeadlineTimer.textContent = '1 час 30 мин';
 
-
-    
     pomodoroTasks.append(pomodoroTasksHeaderTitle, pomodoroTasksQuestList, pomodoroTasksQuestListTasks, pomodoroTasksDeadlineTimer);
 
     return pomodoroTasks;
@@ -230,7 +236,6 @@ export class SectionMain {
     'important' : task.importance === 'standart' ? 'so-so' : 'default'}`;
     li.id = task.id;
 
-
     const span = document.createElement('span');
     span.classList.add('count-number');
     span.textContent = task._count;
@@ -242,8 +247,15 @@ export class SectionMain {
       this.state.activeTodo = task;
       const title = document.querySelector('.window__panel-title');
       const count = document.querySelector('.window__panel-task-text');
+      const btnStart = document.querySelector('.button-primary');
+      const windowTimerText = document.querySelector('.window__timer-text');
+      btnStart.textContent = 'Старт';
       title.textContent = this.state.activeTodo._title;
+      count.textContent = this.state.activeTodo._count;
       this.state.status = 'work';
+      this.timer.stop();
+      windowTimerText.textContent = getTimeMinSec(this.state);
+
     })
 
     const btnTwo = document.createElement('button');
@@ -284,7 +296,7 @@ export class SectionMain {
 
     btnWrapper.append(btnEdit, btnDel);
     li.append(span, btn, btnTwo, btnWrapper);
-
     return li;
   }
+
 }

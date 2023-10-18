@@ -1,4 +1,4 @@
-import { State } from "../State";
+import { State } from "../State/State";
 import { StorageTask } from "../Storage/StorageTask";
 import { Timer } from "../Timer/Timer";
 import { Header } from "./Header/Header";
@@ -15,8 +15,6 @@ constructor(root) {
   this.main = new Main();
   this.section = new SectionMain(this.storage, this.state, this.timer);
   this.render = this.getRender(this.root);
-
-
 }
 
   getRender(root) {

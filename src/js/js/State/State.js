@@ -4,7 +4,7 @@ export class State {
     this.break = breakTime;
     this.relax = relaxTime;
     this.status = 'work';
-    this.count = 0;
+    this.count = 4;
     this.time = this.work * 60;
     this.isActive = false;
     this.timerId = 0;

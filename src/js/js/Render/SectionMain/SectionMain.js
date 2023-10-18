@@ -1,5 +1,5 @@
 import { ImportantTask, StandartTask, UnimportantTask } from '../../Task/Task';
-import {getTimeMinSec, main } from '../../utils';
+import {changeStatusInfo, getTimeMinSec, main } from '../../utils';
 import {addContainer} from '../addContainer';
 
 export class SectionMain {
@@ -28,8 +28,8 @@ export class SectionMain {
     const windowWrapper = document.createElement('div');
     windowWrapper.classList.add('pomodoro-form', 'window');
 
-    const windowPanel = this.getWindowPanel(this.state);
-    const windowBody = this.getWindowBody(this.state);
+    const {windowPanel, windowPanelTaskText} = this.getWindowPanel(this.state);
+    const windowBody = this.getWindowBody(this.state, windowPanelTaskText);
     const form = this.getForm();
     const pomodoroTasks = this.getPomodoroTasks(this.todoList);
 
@@ -59,16 +59,20 @@ export class SectionMain {
     windowPanelTaskText.textContent = state.activeTodo?.count || 0;
 
     windowPanel.append(windowPanelTitle, windowPanelTaskText);
-    return windowPanel;
+    return {windowPanel, windowPanelTaskText};
   }
 
-  getWindowBody(state) {
+  getWindowBody(state, windowPanelTaskText) {
     const windowBody = document.createElement('div');
     windowBody.classList.add('window__body');
 
     const windowTimerText = document.createElement('p');
     windowTimerText.classList.add('window__timer-text');
     windowTimerText.textContent = getTimeMinSec(state);
+
+    const windowTimerInfo = document.createElement('p');
+    windowTimerInfo.classList.add('window__timer-count');
+    windowTimerInfo.textContent = changeStatusInfo(state);
 
     const windowsButtons = document.createElement('div');
     windowsButtons.classList.add('window__buttons');
@@ -86,7 +90,7 @@ export class SectionMain {
       } else {
         state.isActive = true;
         startBtn.textContent = 'Пауза';
-        this.timer.startTimer(windowTimerText);
+        this.timer.startTimer(windowTimerText, windowTimerInfo, windowPanelTaskText);
       }
     });
 
@@ -101,7 +105,7 @@ export class SectionMain {
     });
 
     windowsButtons.append(startBtn, stopBtn);
-    windowBody.append(windowTimerText, windowsButtons);
+    windowBody.append(windowTimerText, windowTimerInfo, windowsButtons);
     return windowBody;
   }
 
@@ -244,14 +248,14 @@ export class SectionMain {
     btn.classList.add('pomodoro-tasks__task-text', 'pomodoro-tasks__task-text_active');
     btn.textContent = task._title;
     btn.addEventListener('click', () => {
-      this.state.activeTodo = task;
+      this.state.setActiveTodo(task);
       const title = document.querySelector('.window__panel-title');
       const count = document.querySelector('.window__panel-task-text');
       const btnStart = document.querySelector('.button-primary');
       const windowTimerText = document.querySelector('.window__timer-text');
       btnStart.textContent = 'Старт';
-      title.textContent = this.state.activeTodo._title;
-      count.textContent = this.state.activeTodo._count;
+      title.textContent = this.state.getActiveTodo()._title;
+      count.textContent = this.state.getActiveTodo()._count;
       this.state.status = 'work';
       this.timer.stop();
       windowTimerText.textContent = getTimeMinSec(this.state);

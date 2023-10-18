@@ -60,6 +60,16 @@
   text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
 }
 
+.window__timer-count {
+  color: $window-panel;
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.2;
+  margin-bottom: 36px;
+  text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
+
 .window__buttons {
   display: flex;
   justify-content: center;

@@ -1,5 +1,5 @@
 export class State {
-  constructor(workTime = 25, breakTime = 5, relaxTime = 15) {
+  constructor(workTime = 0.2, breakTime = 0.1, relaxTime = 0.15) {
     this.work = workTime;
     this.break = breakTime;
     this.relax = relaxTime;
@@ -27,11 +27,11 @@ export class State {
     this.count = count;
   }
 
-  getTimer() {
+  getTime() {
     return this.time;
   }
 
-  setTimer(time) {
+  setTime(time) {
     this.time = time * 60;
   }
 
@@ -50,11 +50,13 @@ export class State {
   setActiveTodo(todo) {
     this.activeTodo = todo;
   }
-  // getIsActive() {
-  //   return this.state.isActive;
-  // }
 
-  // setIsActive(status) {
-  //   this.state.isActive = status;
-  // }
+  getIsActive() {
+    console.log(this.state.isActive);
+    return this.state.isActive;
+  }
+
+  setIsActive(status) {
+    this.state.isActive = status;
+  }
 }

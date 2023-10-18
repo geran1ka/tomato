@@ -1,4 +1,4 @@
-import { audioPlay, getTimeMinSec } from "../utils";
+import {changeStatusInfo, getTimeMinSec } from "../utils";
 
 export class Timer {
   constructor(state) {
@@ -6,10 +6,10 @@ export class Timer {
   }
 
 
-  startTimer(elem) {
-    const countdown = new Date().getTime() + this.state.getTimer() * 1000;
+  startTimer(elemTimer, elemInfo, elemCount) {
+    const countdown = new Date().getTime() + this.state.time * 1000;
     this.state.timerId = setInterval(() => {
-      elem.textContent = getTimeMinSec(this.state);
+      elemTimer.textContent = getTimeMinSec(this.state);
 
       this.state.time -= 1;
       if (this.state.time > 0 && this.state.isActive) {
@@ -20,8 +20,8 @@ export class Timer {
 
 
       if(this.state.status === 'work') {
-        console.log('this.state.activeTodo: ', this.state);
         this.state.activeTodo._count += 1;
+        elemCount.textContent = this.state.activeTodo._count;
         if(this.state.activeTodo._count % this.state.count !== 0) {
           this.state.status = 'break';
 
@@ -33,8 +33,10 @@ export class Timer {
         this.state.status = 'work'
       }
 
+      elemInfo.textContent = changeStatusInfo(this.state);
+
       this.state.time = this.state[this.state.status] * 60;
-      this.startTimer(elem);
+      this.startTimer(elemTimer, elemInfo, elemCount);
     }, 1000)
   }
 
